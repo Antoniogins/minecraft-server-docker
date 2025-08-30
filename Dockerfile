@@ -21,8 +21,8 @@ RUN apt-get update \
     tini \
  && rm -rf /var/lib/apt/lists/*
 
-# Create non-root user
-RUN useradd -m -u 1000 -U -d /home/minecraft -s /bin/bash minecraft
+# Create non-root user (let the system choose a free UID to avoid conflicts)
+RUN useradd -m -U -d /home/minecraft -s /bin/bash minecraft
 
 RUN mkdir -p ${SERVER_HOME} ${DATA_DIR} /usr/local/bin \
  && chown -R minecraft:minecraft ${SERVER_HOME} ${DATA_DIR}
