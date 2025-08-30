@@ -1,0 +1,19 @@
+version: '3.9'
+services:
+  atm10-server-build:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVER_PACK_URL: ${SERVER_PACK_URL-}
+    image: atm10-server:latest
+    command: ["/bin/true"]
+    profiles: ["build"]
+    environment:
+      - SERVER_PACK_URL=${SERVER_PACK_URL}
+    volumes:
+      - mc_data:/data
+volumes:
+  mc_data:
+    name: mc_data
+

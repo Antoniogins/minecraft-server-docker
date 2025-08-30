@@ -1,0 +1,43 @@
+version: '3.9'
+services:
+  atm10-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVER_PACK_URL: ${SERVER_PACK_URL-}
+    image: atm10-server:latest
+    container_name: atm10-server
+    environment:
+      # URL to download the ATM10 server pack zip (from CurseForge/Modrinth/etc.)
+      - SERVER_PACK_URL=${SERVER_PACK_URL}
+      # Java memory
+      - JVM_MIN_MEMORY=${JVM_MIN_MEMORY:-2G}
+      - JVM_MAX_MEMORY=${JVM_MAX_MEMORY:-6G}
+      - JVM_OPTS=${JVM_OPTS:-}
+      # EULA acceptance
+      - EULA=${EULA:-false}
+      # Comma-separated list of Minecraft usernames or UUIDs to grant OP
+      - DEFAULT_OPS=${DEFAULT_OPS:-}
+      # Optional update behavior
+      - WIPE_CONFIG=${WIPE_CONFIG:-false}
+      - WIPE_DIRS=${WIPE_DIRS:-"libraries mods packmenu kubejs defaultconfigs"}
+      # RCON and server port
+      - ENABLE_RCON=${ENABLE_RCON:-true}
+      - RCON_PORT=${RCON_PORT:-25575}
+      - RCON_PASSWORD=${RCON_PASSWORD:-}
+      - SERVER_PORT=${SERVER_PORT:-25565}
+      - TZ=${TZ:-UTC}
+    ports:
+      - "${SERVER_PORT:-25565}:25565"
+      - "${RCON_PORT:-25575}:25575"
+    volumes:
+      - mc_data:/data
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    stop_grace_period: 2m
+
+volumes:
+  mc_data:
+    name: mc_data
