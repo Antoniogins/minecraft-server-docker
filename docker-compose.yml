@@ -6,31 +6,36 @@ services:
       dockerfile: Dockerfile
       args:
         SERVER_PACK_URL: ${SERVER_PACK_URL-}
-    image: atm10-server:latest
     container_name: atm10-server
     environment:
-      # URL to download the ATM10 server pack zip (from CurseForge/Modrinth/etc.)
-      - SERVER_PACK_URL=${SERVER_PACK_URL}
+      # URL to download the ATM10 server pack zip (from CurseForge/Modrinth/etc.). Fill it up
+      - SERVER_PACK_URL=https://mediafilez.forgecdn.net/files/6921/537/ServerFiles-4.10.zip
       # Java memory
-      - JVM_MIN_MEMORY=${JVM_MIN_MEMORY:-2G}
-      - JVM_MAX_MEMORY=${JVM_MAX_MEMORY:-6G}
-      - JVM_OPTS=${JVM_OPTS:-}
+      - JVM_MIN_MEMORY=2G
+      - JVM_MAX_MEMORY=6G
       # EULA acceptance
-      - EULA=${EULA:-false}
+      - EULA=false
       # Comma-separated list of Minecraft usernames or UUIDs to grant OP
-      - DEFAULT_OPS=${DEFAULT_OPS:-}
+      - DEFAULT_OPS=
       # Optional update behavior
-      - WIPE_CONFIG=${WIPE_CONFIG:-false}
-      - WIPE_DIRS=${WIPE_DIRS:-"libraries mods packmenu kubejs defaultconfigs"}
+      - WIPE_CONFIG=false
+      # - WIPE_DIRS="libraries mods packmenu kubejs defaultconfigs"
+      - WIPE_DIRS=
+        - libraries/
+        - mods/
+        - packmenu/
+        - kubejs/
+        - defaultconfigs/
       # RCON and server port
-      - ENABLE_RCON=${ENABLE_RCON:-true}
-      - RCON_PORT=${RCON_PORT:-25575}
-      - RCON_PASSWORD=${RCON_PASSWORD:-}
-      - SERVER_PORT=${SERVER_PORT:-25565}
-      - TZ=${TZ:-UTC}
+      - ENABLE_RCON=true
+      - RCON_PORT=25575
+      - RCON_PASSWORD=
+      - SERVER_PORT=25565
+      - TZ=UTC
     ports:
-      - "${SERVER_PORT:-25565}:25565"
-      - "${RCON_PORT:-25575}:25575"
+    # - "public_port(can change):internal_port(fixed)"
+      - "25565:25565"
+      - "25575:25575"
     volumes:
       - mc_data:/data
     restart: unless-stopped
