@@ -12,19 +12,23 @@ RUN useradd -m -U -d /home/minecraft -s /bin/bash minecraft \
  && mkdir -p "$DATA_DIR" \
  && chown -R minecraft:minecraft "$DATA_DIR"
 
-# Descargar y descomprimir el pack en tiempo de build (caché de capas)
+# Descargar el pack en tiempo de build (se deja cacheado en la imagen)
 ARG SERVER_PACK_URL=https://mediafilez.forgecdn.net/files/6921/537/ServerFiles-4.10.zip
-RUN curl -L -o /tmp/pack.zip "$SERVER_PACK_URL"
-RUN unzip -q /tmp/pack.zip -d "$DATA_DIR" \
- && rm -f /tmp/pack.zip \
- && chown -R minecraft:minecraft "$DATA_DIR"
-
-# Sin entrypoint personalizado; el contenedor arrancará idle por ahora
+RUN mkdir -p /opt/server \
+ && curl -L -o /opt/server/pack.zip "$SERVER_PACK_URL" \
+ && chown -R minecraft:minecraft /opt/server
 
 VOLUME ["/data"]
+
+# Copiar entrypoint que inicializa el volumen en tiempo de arranque
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 WORKDIR /data
 
 EXPOSE 25565 25575
 
-USER minecraft
+# Ejecutar entrypoint como root para poder inicializar el volumen; luego baja privilegios
+USER root
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["sleep", "infinity"]
