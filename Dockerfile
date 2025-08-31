@@ -14,8 +14,8 @@ RUN useradd -m -U -d /home/minecraft -s /bin/bash minecraft \
 
 # Descargar y descomprimir el pack en tiempo de build (caché de capas)
 ARG SERVER_PACK_URL=https://mediafilez.forgecdn.net/files/6921/537/ServerFiles-4.10.zip
-RUN curl -L -o /tmp/pack.zip "$SERVER_PACK_URL" \
- && unzip -q /tmp/pack.zip -d "$DATA_DIR" \
+RUN curl -L -o /tmp/pack.zip "$SERVER_PACK_URL"
+RUN unzip -q /tmp/pack.zip -d "$DATA_DIR" \
  && rm -f /tmp/pack.zip \
  && chown -R minecraft:minecraft "$DATA_DIR"
 
