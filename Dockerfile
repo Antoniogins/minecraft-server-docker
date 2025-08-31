@@ -1,55 +1,30 @@
 FROM eclipse-temurin:21-jdk
 
-ARG SERVER_PACK_URL
+ENV DATA_DIR=/data
 
-ENV SERVER_PACK_URL=${SERVER_PACK_URL} \
-    SERVER_HOME=/opt/server-dist \
-    DATA_DIR=/data \
-    BACKUP_DIR=/data/backups
-
+# Paquetes mínimos para descarga y copia
 RUN apt-get update \
- && apt-get install -y --no-install-recommends \
-    bash \
-    ca-certificates \
-    curl \
-    jq \
-    tzdata \
-    unzip \
-    wget \
-    rsync \
-    zip \
-    tini \
+ && apt-get install -y --no-install-recommends curl unzip rsync \
  && rm -rf /var/lib/apt/lists/*
 
-# Create non-root user (let the system choose a free UID to avoid conflicts)
-RUN useradd -m -U -d /home/minecraft -s /bin/bash minecraft
+# Usuario no root para ejecutar el servidor
+RUN useradd -m -U -d /home/minecraft -s /bin/bash minecraft \
+ && mkdir -p "$DATA_DIR" \
+ && chown -R minecraft:minecraft "$DATA_DIR"
 
-RUN mkdir -p ${SERVER_HOME} ${DATA_DIR} /usr/local/bin \
- && chown -R minecraft:minecraft ${SERVER_HOME} ${DATA_DIR}
+# Descargar y descomprimir el pack en tiempo de build (caché de capas)
+ARG SERVER_PACK_URL=https://mediafilez.forgecdn.net/files/6921/537/ServerFiles-4.10.zip
+RUN curl -L -o /tmp/pack.zip "$SERVER_PACK_URL" \
+ && unzip -q /tmp/pack.zip -d "$DATA_DIR" \
+ && rm -f /tmp/pack.zip \
+ && chown -R minecraft:minecraft "$DATA_DIR"
 
-# Download and unpack ATM10 server pack at build time if URL is provided
-RUN if [ -n "${SERVER_PACK_URL}" ]; then \
-      echo "Downloading server pack from ${SERVER_PACK_URL}" && \
-      wget -O /tmp/pack.zip "${SERVER_PACK_URL}" && \
-      unzip -q /tmp/pack.zip -d "${SERVER_HOME}" && \
-      rm -f /tmp/pack.zip && \
-      if [ -f "${SERVER_HOME}/startserver.sh" ]; then chmod +x "${SERVER_HOME}/startserver.sh"; fi; \
-    else \
-      echo "SERVER_PACK_URL not provided at build time; you'll need to place files at runtime"; \
-    fi
+# Sin entrypoint personalizado; el contenedor arrancará idle por ahora
 
-# Copy entrypoint
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+VOLUME ["/data"]
+WORKDIR /data
 
 EXPOSE 25565 25575
 
-VOLUME ["${DATA_DIR}"]
-
-WORKDIR ${DATA_DIR}
-
 USER minecraft
-
-ENTRYPOINT ["/usr/bin/tini", "-g", "--", "/usr/local/bin/entrypoint.sh"]
-
-
+CMD ["sleep", "infinity"]

@@ -6,14 +6,21 @@ services:
       dockerfile: Dockerfile
     container_name: atm10-server
     environment:
-      - SERVER_PACK_URL=https://mediafilez.forgecdn.net/files/6921/537/ServerFiles-4.10.zip
+      - TZ=UTC
+      - EULA=false
+      - EXTRA_MODS=""
+
     ports:
     # - "public_port(can change):internal_port(fixed)"
       - "25565:25565"
       - "25575:25575"
     volumes:
-      - ./mc_data:/data
+      - mc_data:/data
     restart: unless-stopped
     # stdin_open: true
     # tty: true
     stop_grace_period: 2m
+
+volumes:
+  mc_data:
+    name: mc_data
